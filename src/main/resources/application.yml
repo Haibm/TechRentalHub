@@ -22,5 +22,8 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/techrentalhub_mongo
 
+  elasticsearch:
+    uris: http://localhost:9200
+
 jwt:
   expirationMs: 86400000 # 24 hours
