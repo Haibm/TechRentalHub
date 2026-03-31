@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Staff Notification Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
+        #notifications { max-width: 600px; margin: 0 auto; }
+        .notification { background: white; border-left: 5px solid #2ecc71; padding: 15px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: slideIn 0.3s ease-out; }
+        .notification h4 { margin: 0 0 5px 0; color: #2c3e50; }
+        .notification p { margin: 0; color: #7f8c8d; font-size: 0.9em; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div id="notifications">
+        <h1>Staff Dashboard (Notifications)</h1>
+        <p id="status" style="color: orange;">Connecting...</p>
+        <div id="list"></div>
+    </div>
+
+    <script>
+        const socket = new SockJS('/ws-rental');
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            document.getElementById('status').innerText = 'Connected to Server ✓';
+            document.getElementById('status').style.color = 'green';
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe('/topic/orders', function (notification) {
+                const data = JSON.parse(notification.body);
+                showNotification(data);
+            });
+        }, function(error) {
+            document.getElementById('status').innerText = 'Connection Failed ✗';
+            document.getElementById('status').style.color = 'red';
+            console.error('STOMP error: ' + error);
+        });
+
+        function showNotification(data) {
+            const list = document.getElementById('list');
+            const div = document.createElement('div');
+            div.className = 'notification';
+            div.innerHTML = `
+                <h4>${data.message}</h4>
+                <p><strong>Khách hàng:</strong> ${data.customerName}</p>
+                <p><strong>Thiết bị:</strong> ${data.deviceName}</p>
+                <p><strong>Tiền cọc:</strong> ${data.depositAmount.toLocaleString()} VNĐ</p>
+                <p style="font-size: 0.8em; margin-top: 5px; color: #bdc3c7;">ID Đơn: #${data.orderId} | Lúc: ${data.timestamp}</p>
+            `;
+            list.prepend(div);
+        }
+    </script>
+</body>
+</html>

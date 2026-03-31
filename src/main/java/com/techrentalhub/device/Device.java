@@ -31,6 +31,8 @@ public class Device {
 
     private String imageUrl;
 
+    private String category; // LAPTOP / PHONE / TABLET / OTHER
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
